@@ -311,7 +311,7 @@ while camera_video.isOpened():
     draw_instructions(frame)
 
     # Display the frame.
-    cv2.imshow("🎮 Vertical Movement Control", frame)
+    cv2.imshow("Vertical Movement Control", frame)
 
     # Wait for 1ms. If a key is pressed, retreive the ASCII code of the key.
     k = cv2.waitKey(1) & 0xFF
