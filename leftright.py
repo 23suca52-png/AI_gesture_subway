@@ -241,65 +241,65 @@ def checkLeftRight(image, results, draw=False, display=False):
         return output_image, horizontal_position
 
 
-# Initiolize the VideoCapture object to read from the webcam.
-camera_video = cv2.VideoCapture(0)
-camera_video.set(3, 1280)
-camera_video.set(4, 960)
+if __name__ == "__main__":
+    # Initiolize the VideoCapture object to read from the webcam.
+    camera_video = cv2.VideoCapture(0)
+    camera_video.set(3, 1280)
+    camera_video.set(4, 960)
 
-# FPS calculation
-prev_frame_time = 0
-curr_frame_time = 0
+    # FPS calculation
+    prev_frame_time = 0
+    curr_frame_time = 0
 
-# Create named window for resizing purposes.
-cv2.namedWindow(" Horizontal Movement Control", cv2.WINDOW_NORMAL)
+    # Create named window for resizing purposes.
+    cv2.namedWindow(" Horizontal Movement Control", cv2.WINDOW_NORMAL)
 
-# Iterate until the webcam is accessed successfully.
-while camera_video.isOpened():
+    # Iterate until the webcam is accessed successfully.
+    while camera_video.isOpened():
 
-    # Read a frame.
-    ok, frame = camera_video.read()
+        # Read a frame.
+        ok, frame = camera_video.read()
 
-    # Check if frame is not read properly then continue to the next iteration to read the next frame.
-    if not ok:
-        continue
+        # Check if frame is not read properly then continue to the next iteration to read the next frame.
+        if not ok:
+            continue
 
-    # Calculate FPS
-    curr_frame_time = time_module.time()
-    fps = 1 / (curr_frame_time - prev_frame_time) if prev_frame_time != 0 else 0
-    prev_frame_time = curr_frame_time
+        # Calculate FPS
+        curr_frame_time = time_module.time()
+        fps = 1 / (curr_frame_time - prev_frame_time) if prev_frame_time != 0 else 0
+        prev_frame_time = curr_frame_time
 
-    # Flip the frame horizontally for natural (selfie-view) visualization.
-    frame = cv2.flip(frame, 1)
+        # Flip the frame horizontally for natural (selfie-view) visualization.
+        frame = cv2.flip(frame, 1)
 
-    # Get the height and width of the frame of the webcame video.
-    frame_height, frame_width, _ = frame.shape
+        # Get the height and width of the frame of the webcame video.
+        frame_height, frame_width, _ = frame.shape
 
-    # Perform the pose detection on the frame.
-    frame, results = detectPose(frame, pose_video, draw=True)
+        # Perform the pose detection on the frame.
+        frame, results = detectPose(frame, pose_video, draw=True)
 
-    # Check if the pose Landmarks in the frame are detected.
-    horizontal_position = "Unknown"
-    if results.pose_landmarks:
+        # Check if the pose Landmarks in the frame are detected.
+        horizontal_position = "Unknown"
+        if results.pose_landmarks:
 
-        # Check horizontal position of the person and draw a line at the center of the frame.
-        frame, horizontal_position = checkLeftRight(frame, results, draw=True)
+            # Check horizontal position of the person and draw a line at the center of the frame.
+            frame, horizontal_position = checkLeftRight(frame, results, draw=True)
 
-    # Draw UI elements
-    draw_horizontal_zones(frame)
-    draw_status_panel(frame, horizontal_position, fps)
-    draw_instructions(frame)
+        # Draw UI elements
+        draw_horizontal_zones(frame)
+        draw_status_panel(frame, horizontal_position, fps)
+        draw_instructions(frame)
 
-    # Display the frame.
-    cv2.imshow(" Horizontal Movement Control", frame)
+        # Display the frame.
+        cv2.imshow(" Horizontal Movement Control", frame)
 
-    # Wait for 1ms. If a key is pressed, retreive the ASCII code of the key.
-    k = cv2.waitKey(1) & 0xFF
+        # Wait for 1ms. If a key is pressed, retreive the ASCII code of the key.
+        k = cv2.waitKey(1) & 0xFF
 
-    # Check if 'ESC' is pressed and break the loop.
-    if k == 27:
-        break
+        # Check if 'ESC' is pressed and break the loop.
+        if k == 27:
+            break
 
-
-# Release the VideoCapture Object and close the windows.
-camera_video.release()
-cv2.destroyAllWindows()
+    # Release the VideoCapture Object and close the windows.
+    camera_video.release()
+    cv2.destroyAllWindows()

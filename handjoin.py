@@ -160,6 +160,10 @@ def draw_instructions(frame):
 
 def checkHandsJoined(image, results, draw=False, display=False):
 
+    # ✅ SAFETY CHECK (ADD THIS BLOCK)
+    if results is None or results.pose_landmarks is None:
+        return image, "No Pose"
+
     # Get the height and width of the input imoge.
     height, width, _ = image.shape
 
@@ -231,86 +235,86 @@ def checkHandsJoined(image, results, draw=False, display=False):
         return output_image, hand_status
 
 
-# Initiolize the VideoCapture object to read from the webcam.
-camera_video = cv2.VideoCapture(0)
-camera_video.set(3, 1280)
-camera_video.set(4, 960)
+if __name__ == "__main__":
+    # Initiolize the VideoCapture object to read from the webcam.
+    camera_video = cv2.VideoCapture(0)
+    camera_video.set(3, 1280)
+    camera_video.set(4, 960)
 
-# FPS calculation
-prev_frame_time = 0
-curr_frame_time = 0
+    # FPS calculation
+    prev_frame_time = 0
+    curr_frame_time = 0
 
-# Create named window for resizing purposes.
-cv2.namedWindow("🎮 Hand Join Detector", cv2.WINDOW_NORMAL)
+    # Create named window for resizing purposes.
+    cv2.namedWindow("🎮 Hand Join Detector", cv2.WINDOW_NORMAL)
 
-# Iterate until the webcam is accessed successfully.
-while camera_video.isOpened():
+    # Iterate until the webcam is accessed successfully.
+    while camera_video.isOpened():
 
-    # Read a frame.
-    ok, frame = camera_video.read()
+        # Read a frame.
+        ok, frame = camera_video.read()
 
-    # Check if frame is not read properly then continue to the next iteration to read the next frame.
-    if not ok:
-        continue
+        # Check if frame is not read properly then continue to the next iteration to read the next frame.
+        if not ok:
+            continue
 
-    # Calculate FPS
-    curr_frame_time = time_module.time()
-    fps = 1 / (curr_frame_time - prev_frame_time) if prev_frame_time != 0 else 0
-    prev_frame_time = curr_frame_time
+        # Calculate FPS
+        curr_frame_time = time_module.time()
+        fps = 1 / (curr_frame_time - prev_frame_time) if prev_frame_time != 0 else 0
+        prev_frame_time = curr_frame_time
 
-    # Flip the frame horizontally for natural (selfie-view) visualization.
-    frame = cv2.flip(frame, 1)
+        # Flip the frame horizontally for natural (selfie-view) visualization.
+        frame = cv2.flip(frame, 1)
 
-    # Get the height and width of the frame of the webcame video.
-    frame_height, frame_width, _ = frame.shape
+        # Get the height and width of the frame of the webcame video.
+        frame_height, frame_width, _ = frame.shape
 
-    # Perform the pose detection on the frame.
-    frame, results = detectPose(frame, pose_video, draw=True)
+        # Perform the pose detection on the frame.
+        frame, results = detectPose(frame, pose_video, draw=True)
 
-    # Check if the pose Landmarks in the frame are detected.
-    hand_status = "Unknown"
-    distance = 0
-    if results.pose_landmarks:
+        # Check if the pose Landmarks in the frame are detected.
+        hand_status = "Unknown"
+        distance = 0
+        if results.pose_landmarks:
 
-        # Check if the left and right hands are joined.
-        frame, hand_status = checkHandsJoined(frame, results, draw=True)
+            # Check if the left and right hands are joined.
+            frame, hand_status = checkHandsJoined(frame, results, draw=True)
 
-        # Calculate distance for display
-        left_wrist_landmark = (
-            results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x
-            * frame_width,
-            results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y
-            * frame_height,
-        )
-        right_wrist_landmark = (
-            results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].x
-            * frame_width,
-            results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].y
-            * frame_height,
-        )
-        distance = int(
-            hypot(
-                left_wrist_landmark[0] - right_wrist_landmark[0],
-                left_wrist_landmark[1] - right_wrist_landmark[1],
+            # Calculate distance for display
+            left_wrist_landmark = (
+                results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].x
+                * frame_width,
+                results.pose_landmarks.landmark[mp_pose.PoseLandmark.LEFT_WRIST].y
+                * frame_height,
             )
-        )
+            right_wrist_landmark = (
+                results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].x
+                * frame_width,
+                results.pose_landmarks.landmark[mp_pose.PoseLandmark.RIGHT_WRIST].y
+                * frame_height,
+            )
+            distance = int(
+                hypot(
+                    left_wrist_landmark[0] - right_wrist_landmark[0],
+                    left_wrist_landmark[1] - right_wrist_landmark[1],
+                )
+            )
 
-    # Draw UI elements
-    draw_wrist_indicator(frame, hand_status)
-    draw_status_panel(frame, hand_status, distance, fps)
-    draw_instructions(frame)
+        # Draw UI elements
+        draw_wrist_indicator(frame, hand_status)
+        draw_status_panel(frame, hand_status, distance, fps)
+        draw_instructions(frame)
 
-    # Display the frame.
-    cv2.imshow("🎮 Hand Join Detector", frame)
+        # Display the frame.
+        cv2.imshow("Hand Join Detector", frame)
 
-    # Wait for 1ms. If a key is pressed, retreive the ASCII code of the key.
-    k = cv2.waitKey(1) & 0xFF
+        # Wait for 1ms. If a key is pressed, retreive the ASCII code of the key.
+        k = cv2.waitKey(1) & 0xFF
 
-    # Check if 'ESC' is pressed and break the loop.
-    if k == 27:
-        break
+        # Check if 'ESC' is pressed and break the loop.
+        if k == 27:
+            break
 
-
-# Release the VideoCapture Object and close the windows.
-camera_video.release()
-cv2.destroyAllWindows()
+    # Release the VideoCapture Object and close the windows.
+    camera_video.release()
+    cv2.destroyAllWindows()
